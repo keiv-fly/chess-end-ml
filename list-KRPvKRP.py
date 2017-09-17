@@ -42,7 +42,8 @@ for i_piece in range(2):
     j = ii_start[i_piece * 2 + 1]
     board_start.set_piece_at(i * 8 + j, pieces_chess[i_piece])
 
-def calc_iter(i_lists, board_start, pc_num, pieces_chess, tablebases):
+def calc_iter(i_lists, board_start, pc_num, pieces_chess):
+    board = board_start
     l_boards = []
     l_wdl = []
     n_iter = np.prod(np.array([len(x) for x in i_lists]))
@@ -50,6 +51,7 @@ def calc_iter(i_lists, board_start, pc_num, pieces_chess, tablebases):
     for ii in itertools.product(*i_lists):
         if i_counter % 100000 == 0:
             print(i_counter, " of ", n_iter,", time: ", datetime.datetime.now().strftime("%H:%M:%S.%f"))
+            print(board.fen())
         board = board_start.copy()
         for i_piece in range(2,pc_num):
             i = ii[i_piece * 2]
@@ -59,11 +61,10 @@ def calc_iter(i_lists, board_start, pc_num, pieces_chess, tablebases):
             l_boards.append(board.fen())
             #l_wdl.append(tablebases.probe_wdl(board))
         i_counter = i_counter + 1
-    return l_boards, l_wdl
+    return l_boards
 
 #calc_iter_nb = numba.jit(calc_iter)
-with chess.syzygy.open_tablebases(r"C:\Users\Lenovo\Downloads\syzygy") as tablebases:
-    l_boards, l_wdl = calc_iter(i_lists, board_start, pc_num, pieces_chess, tablebases)
+l_boards = calc_iter(i_lists, board_start, pc_num, pieces_chess)
 
 def calc_iter_wdl(i_lists, board_start, pc_num, pieces_chess, tablebases):
     l_boards = []
