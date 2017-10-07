@@ -4,7 +4,7 @@ import datetime
 import numba
 
 i_file=2
-df=pd.read_hdf("data/KRPvKRP_table_" + '{:02d}'.format(i_file) + ".h5", 'df1')
+df=pd.read_hdf("data/KRPvKRP_table_5M_random.h5", 'df1')
 
 #df=df.head(1000000)
 
@@ -26,7 +26,7 @@ ii = ii+1
 for i in range(int(np.ceil(n_rows/1000))):
     m_i = min(1000*(i+1),n_rows)
     idx = list(range(i*1000,m_i))
-    data[idx,1,df.K[idx] // 8, df.K[idx] % 8] = 1
+    data[idx,1,df.K[idx].values // 8, df.K[idx] % 8] = 1
 print(ii)
 ii = ii+1
 for i in range(int(np.ceil(n_rows/1000))):
@@ -91,4 +91,4 @@ print(ii)
 ii = ii+1
 print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
 
-np.save("data\KRPvKRP_17f.npy",data)
+np.save("data\KRPvKRP_17f_5M_random.npy",data)
