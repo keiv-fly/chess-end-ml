@@ -7,31 +7,6 @@ import numpy as np
 import numba
 import datetime
 
-def valid_board(turn,i_board_i_j,i_board):
-    if turn:
-        if i_board_i_j[2] == i_board_i_j[6]:
-            return False
-        if i_board_i_j[3] == i_board_i_j[7]:
-            return False
-        if i_board[3] == i_board[4]-7:
-            return False
-        if i_board[3] == i_board[4]-9:
-            return False
-    else:
-        if i_board_i_j[0] == i_board_i_j[8]:
-            return False
-        if i_board_i_j[1] == i_board_i_j[9]:
-            return False
-        if i_board[6] == i_board[1]+7:
-            return False
-        if i_board[6] == i_board[1]+9:
-            return False
-    if max(abs(i_board_i_j[0]-i_board_i_j[6]),abs(i_board_i_j[1]-i_board_i_j[7])) == 1:
-        return False
-    return True
-
-regex = re.compile(r'[a-zA-Z]')
-
 board_start = chess.Board("K1k5/P7/8/8/8/8/8/8 w - - 0 0")
 board_start0 = chess.Board("8/8/8/8/8/8/8/8 w - - 0 0")
 
@@ -61,7 +36,7 @@ with chess.syzygy.open_tablebases(r"C:\Users\Lenovo\Downloads\syzygy") as tableb
         board = board_start0.copy()
         i_board = []
         i_board_i_j = []
-        turn = np.random.uniform()<0.5
+        turn = True
         board.turn = turn
         i_board.append(turn)
         i_piece = 0
@@ -72,22 +47,21 @@ with chess.syzygy.open_tablebases(r"C:\Users\Lenovo\Downloads\syzygy") as tableb
             i_board.append(i * 8 + j)
             i_board_i_j.append(i)
             i_board_i_j.append(j)
-        #print(board)
-        # if len(i_board)!=len(set(i_board)):
-        #     i_counter = i_counter + 1
-        #     continue
-        if board.is_valid() and len(''.join(x for x in board.board_fen() if x.isalpha())) == pc_num:
-        #if board.is_valid():
-        #if valid_board(turn,i_board_i_j,i_board):
+        if len(i_board)!=len(set(i_board)):
+            i_counter = i_counter + 1
+            continue
+        if board.is_valid():
             l_boards.append(i_board)
-            l_wdl.append(tablebases.probe_wdl(board)*(turn*2-1))
+            l_wdl.append(tablebases.probe_wdl(board)) #*(turn*2-1))
         i_counter = i_counter + 1
 
 df1=pd.DataFrame(l_boards)
 df1.columns = ["move", "K", "R", "P", "k", "r", "p"]
 df1["wdl"] = l_wdl
 df2=df1.drop_duplicates()
+len(df2.index)
 df2.wdl.value_counts()
-
-df2.to_hdf("data/KRPvKRP_table_10M_random.h5", 'df1', complib='blosc:lz4', complevel=9)
-df2.reset_index(drop=True)[:5000000].to_hdf("data/KRPvKRP_table_5M_random.h5", 'df1', complib='blosc:lz4', complevel=9)
+df2 = df2.reset_index(drop=True)
+df2.to_hdf("data/KRPvKRP_table_10M_random_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
+df2[:5000000].to_hdf("data/KRPvKRP_table_5M_random_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
+df2[5000000:5010240].reset_index(drop=True).to_hdf("data/KRPvKRP_table_10K_random_test_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
