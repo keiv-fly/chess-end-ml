@@ -31,52 +31,39 @@ y[:,4] = (df["wdl"]==2)*1
 inputs = Input(shape=(8,8,17))
 x = inputs
 #x = BatchNormalization()(inputs)
-x1 = Conv2D(32, (1, 1), padding="same")(x)
-x2 = Conv2D(32, (5, 5), padding="same")(x)
+x1 = Conv2D(256, (1, 1), padding="same")(x)
+x2 = Conv2D(256, (5, 5), padding="same")(x)
 x = Add()([x1, x2])
 x = Activation("relu")(x)
 
 def res_layer(x):
-    x1 = Conv2D(32, (1, 1), padding="same")(x)
-    x = Add()([x1, x])
+    x = BatchNormalization()(x)
     x = Activation("relu")(x)
+    x1 = Conv2D(256, (1, 1), padding="same")(x)
+    x = Add()([x1, x])
     return x
 for i in range(12):
     x = res_layer(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-# x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
-#x = Conv2D(32, (3, 3), activation='relu', padding="same")(x)
 
 x = Flatten()(x)
 predictions = (Dense(5, activation='softmax'))(x)
 #adam=Adam()
 
 model = Model(inputs=inputs, outputs=predictions)
-sgd = SGD(lr=0.01, momentum=0.9)
+sgd = SGD(lr=0.005, momentum=0.9)
 model.compile(loss='categorical_crossentropy', optimizer=sgd)
-hist = model.fit(X, y, batch_size=256, epochs=1) #1024*8
-model.save(r"data/model1KRPvKRP_r_temp1.h5")
-y_train = model.predict(X, batch_size=1024*8, verbose=1)
+hist = model.fit(X, y, batch_size=256, epochs=99) #1024*8
+model.save(r"data/model2KRPvKRP_r_temp2.h5")
+
+_ = [print(x) for x in hist.history["loss"]]
+s1 = pd.Series([x for x in hist.history["loss"]])
+s1.to_csv("data/model2KRPvKRP_r_temp2_acc.csv", index=False)
+# model.summary()
+
+y_train = model.predict(X, batch_size=1024*2, verbose=1)
 y_train_cat=np.argmax(y_train,1)-2
 acc = np.sum(y_train_cat==df.wdl)/y_train_cat.shape[0]
 print("\naccuracy = ", acc)
-_ = [print(x) for x in hist.history["loss"]]
-model.summary()
 
 #model.save(r"data/model2KRPvKRP_temp1.h5")
 #model=load_model(r"data/model1KRPvKRP_temp1.h5")
