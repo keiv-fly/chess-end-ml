@@ -3,9 +3,8 @@ import numpy as np
 import datetime
 import numba
 
-i_file=2
-#df=pd.read_hdf("data/KRPvKRP_table_10k_random_test_v2.h5", 'df1')
-df=pd.read_hdf("data/KRPvKRP_table_10K_random_test_v2_02.h5", 'df1')
+
+df=pd.read_hdf("data/KRPvKRP_table_10M_random_v2_03.h5", 'df1')
 
 # df=df[5000000:5010240].reset_index(drop=True)
 
@@ -89,4 +88,4 @@ print(ii)
 ii = ii+1
 print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
 
-np.save("data/KRPvKRP_16f_10K_random_test_v2_02.npy",data)
+np.save("data/KRPvKRP_16f_10M_random_v2_03.npy",data)

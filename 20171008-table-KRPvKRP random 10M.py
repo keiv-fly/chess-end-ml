@@ -27,7 +27,7 @@ l_boards = []
 l_wdl = []
 board = board_start0.copy()
 i_counter = 0
-n_iter=100001
+n_iter=25000000
 with chess.syzygy.open_tablebases(r"C:\Users\Lenovo\Downloads\syzygy") as tablebases:
     for ii in range(n_iter):
         if i_counter % 100000 == 0:
@@ -59,9 +59,18 @@ df1=pd.DataFrame(l_boards)
 df1.columns = ["move", "K", "R", "P", "k", "r", "p"]
 df1["wdl"] = l_wdl
 df2=df1.drop_duplicates()
-len(df2.index)
-df2.wdl.value_counts()
+print(len(df2.index))
+print(df2.wdl.value_counts())
 df2 = df2.reset_index(drop=True)
-df2.to_hdf("data/KRPvKRP_table_10M_random_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
-df2[:5000000].to_hdf("data/KRPvKRP_table_5M_random_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
-df2[5000000:5010240].reset_index(drop=True).to_hdf("data/KRPvKRP_table_10K_random_test_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
+
+df2.to_hdf("data/KRPvKRP_table_10M_random_v2_03.h5", 'df1', complib='blosc:lz4', complevel=9)
+
+
+
+
+#df2[:5000000].to_hdf("data/KRPvKRP_table_5M_random_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
+#df2[5000000:5010240].reset_index(drop=True).to_hdf("data/KRPvKRP_table_10K_random_test_v2.h5", 'df1', complib='blosc:lz4', complevel=9)
+
+#df2=pd.read_hdf("data/KRPvKRP_table_10M_random_v2.h5", 'df1')
+#df2[5000000:10000000].reset_index(drop=True).to_hdf("data/KRPvKRP_table_5M_random_v2_02.h5", 'df1', complib='blosc:lz4', complevel=9)
+#df2[10000000:10010240].reset_index(drop=True).to_hdf("data/KRPvKRP_table_10K_random_test_v2_02.h5", 'df1', complib='blosc:lz4', complevel=9)

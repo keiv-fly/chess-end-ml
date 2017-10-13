@@ -1,6 +1,7 @@
-#nohup python -u py3.py > out.txt 2>&1 &
+# nohup python -u py3.py > out.txt 2>&1 &
 # tail -f out.txt
 
+print("imports")
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
@@ -10,95 +11,16 @@ from keras.optimizers import Adam, SGD
 from keras.utils import to_categorical
 from keras.models import load_model
 import datetime
+from lib import features_from_table
 
+print("code start")
 #generate Numpy Data from a table
 df=pd.read_hdf("data/KRPvKRP_table_10M_random_v2_03.h5", 'df1')
 
 # df=df[5000000:5010240].reset_index(drop=True)
 
-board_shape = (8, 8)
 
-n_rows = len(df.index)
-
-data = np.zeros((n_rows, 16, 8, 8), dtype=np.float16)
-ii=0
-print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
-print(ii)
-ii = ii+1
-# data[:,0, :, :] = df.move.values[:, np.newaxis, np.newaxis]
-# print(ii)
-# ii = ii+1
-for i in range(int(np.ceil(n_rows/1000))):
-    m_i = min(1000*(i+1),n_rows)
-    idx = list(range(i*1000,m_i))
-    data[idx,0,df.K[idx].values // 8, df.K[idx] % 8] = 1
-print(ii)
-ii = ii+1
-for i in range(int(np.ceil(n_rows/1000))):
-    m_i = min(1000*(i+1),n_rows)
-    idx = list(range(i*1000,m_i))
-    data[idx,1,df.k[idx] // 8, df.k[idx] % 8] = 1
-print(ii)
-ii = ii+1
-for i in range(int(np.ceil(n_rows / 1000))):
-    m_i = min(1000 * (i + 1), n_rows)
-    idx = list(range(i * 1000, m_i))
-    data[idx, 2, df.R[idx] // 8, df.R[idx] % 8] = 1
-print(ii)
-ii = ii+1
-for i in range(int(np.ceil(n_rows / 1000))):
-    m_i = min(1000 * (i + 1), n_rows)
-    idx = list(range(i * 1000, m_i))
-    data[idx, 3, df.r[idx] // 8, df.r[idx] % 8] = 1
-print(ii)
-ii = ii+1
-for i in range(int(np.ceil(n_rows / 1000))):
-    m_i = min(1000 * (i + 1), n_rows)
-    idx = list(range(i * 1000, m_i))
-    data[idx, 4, df.P[idx] // 8, df.P[idx] % 8] = 1
-print(ii)
-ii = ii+1
-for i in range(int(np.ceil(n_rows / 1000))):
-    m_i = min(1000 * (i + 1), n_rows)
-    idx = list(range(i * 1000, m_i))
-    data[idx, 5, df.p[idx] // 8, df.p[idx] % 8] = 1
-print(ii)
-ii = ii+1
-data[:,6,:, :] = ((df.K // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,7,:, :] = ((df.k // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,8,:, :] = ((df.R // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,9,:, :] = ((df.r // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,10,:, :] = ((df.P // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,11,:, :] = ((df.p // 8) / 7)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,12,:, :] = (np.maximum(abs((df.P // 8) - (df.K // 8)), abs((df.P % 8) - (df.K % 8))) / 8)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,13,:, :] = (np.maximum(abs((df.P // 8) - (df.k // 8)), abs((df.P % 8) - (df.k % 8))) / 8)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,14,:, :] = (np.maximum(abs((df.p // 8) - (df.K // 8)), abs((df.P % 8) - (df.K % 8))) / 8)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-data[:,15,:, :] = (np.maximum(abs((df.p // 8) - (df.k // 8)), abs((df.P % 8) - (df.k % 8))) / 8)[:, np.newaxis, np.newaxis]
-print(ii)
-ii = ii+1
-print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
-
-#------------------------------------------------------------------------------
-
-X=data
+X=features_from_table(df)
 
 #X = np.load("data/KRPvKRP_16f_5M_random_v2_02.npy")
 X = np.swapaxes(X,1,2)
@@ -135,7 +57,7 @@ sgd = SGD(lr=0.002, momentum=0.9)
 m.compile(loss='categorical_crossentropy', optimizer=sgd)
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-hist = m.fit(X, y, batch_size=256, epochs=24, validation_data=(X2,y2))
+hist = m.fit(X, y, batch_size=256, epochs=6, validation_data=(X2,y2))
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
 m.save(r"data/model3KRPvKRP_r_temp6.h5")
 
