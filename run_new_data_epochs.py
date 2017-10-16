@@ -1,4 +1,4 @@
-# nohup python -u run_6_epochs.py > out.txt 2>&1 &
+# nohup python -u run_new_data_epochs.py > out.txt 2>&1 &
 # tail -f out.txt
 
 print("imports")
@@ -11,6 +11,7 @@ from keras.optimizers import Adam, SGD
 from keras.utils import to_categorical
 from keras.models import load_model
 import datetime
+import os
 from lib import features_from_table,generate_table
 
 print("code start")
@@ -30,18 +31,22 @@ y2[:,3] = (df2["wdl"]==1)*1
 y2[:,4] = (df2["wdl"]==2)*1
 
 # load the previous model
-m=load_model(r"data/model3KRPvKRP_r_temp7.h5")
+m=load_model(r"data/model3KRPvKRP_r_temp9.h5")
 
 # change the learning rate
 sgd = SGD(lr=0.002, momentum=0.9)
 m.compile(loss='categorical_crossentropy', optimizer=sgd)
 
-for i_data_epochs in range(2):
-    # generate table with positions and results (wdl)
-    start_time = datetime.datetime.now()
-    df=generate_table()
-    end_time = datetime.datetime.now()
-    print("Position generation time: ",end_time - start_time)
+hist_loss=[]
+hist_val_loss=[]
+hist_acc=[]
+
+for i_data_epochs in range(5):
+    # generate table with positions and results (wdl) in parallel to calculation
+    os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
+
+    #load table calculated in the previous iteration
+    df = pd.read_hdf("data/KRPvKRP_table_10M_random_iter.h5")
 
     # generate feature boards from the table above
     start_time = datetime.datetime.now()
@@ -66,9 +71,10 @@ for i_data_epochs in range(2):
     # calculate epochs and calculate execution time
     start_time = datetime.datetime.now()
     print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
-    hist = m.fit(X, y, batch_size=256, epochs=2, validation_data=(X2,y2))
+    hist = m.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2))
     end_time = datetime.datetime.now()
-    m.save(r"data/model3KRPvKRP_r_temp8.h5")
+    os.remove(r"data/model3KRPvKRP_r_temp9.h5")
+    m.save(r"data/model3KRPvKRP_r_temp9.h5")
     print(end_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
     print("Training time: ",end_time - start_time)
 
@@ -76,13 +82,23 @@ for i_data_epochs in range(2):
     _ = [print(x) for x in hist.history["loss"]]
     print()
     _ = [print(x) for x in hist.history["val_loss"]]
+    hist_loss = hist_loss + hist.history["loss"]
+    hist_val_loss = hist_val_loss + hist.history["val_loss"]
+
 
     # calculate and print accuracy
     y_train = m.predict(X2, batch_size=1024*2, verbose=1)
     y_train_cat=np.argmax(y_train,1)-2
     acc = np.sum(y_train_cat==df2.wdl)/y_train_cat.shape[0]
+    hist_acc.append(acc)
     n_errors = y_train_cat.shape[0] - np.sum(y_train_cat==df2.wdl)
     print("\n\naccuracy\n% errors\n# errors")
     print(acc)
     print(1-acc)
     print(n_errors)
+
+_ = [print(x) for x in hist_loss]
+print()
+_ = [print(x) for x in hist_val_loss]
+print()
+_ = [print(x) for x in hist_acc]

@@ -2,6 +2,7 @@
 # tail -f out.txt
 
 print("imports")
+import os
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
@@ -54,7 +55,7 @@ y2[:,3] = (df2["wdl"]==1)*1
 y2[:,4] = (df2["wdl"]==2)*1
 
 # load the previous model
-m=load_model(r"data/model3KRPvKRP_r_temp6.h5")
+m=load_model(r"data/model3KRPvKRP_r_temp8.h5")
 
 # change the learning rate
 sgd = SGD(lr=0.002, momentum=0.9)
@@ -63,9 +64,10 @@ m.compile(loss='categorical_crossentropy', optimizer=sgd)
 # calculate 6 epochs and calculate execution time
 start_time = datetime.datetime.now()
 print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
-hist = m.fit(X, y, batch_size=256, epochs=6, validation_data=(X2,y2))
+hist = m.fit(X, y, batch_size=256, epochs=3, validation_data=(X2,y2))
 end_time = datetime.datetime.now()
-m.save(r"data/model3KRPvKRP_r_temp7.h5")
+os.remove(r"data/model3KRPvKRP_r_temp8.h5")
+m.save(r"data/model3KRPvKRP_r_temp8.h5")
 print(end_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
 print("Training time: ",end_time - start_time)
 
