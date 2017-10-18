@@ -41,7 +41,8 @@ hist_loss=[]
 hist_val_loss=[]
 hist_acc=[]
 
-for i_data_epochs in range(5):
+for i_data_epochs in range(60):
+    print("\niteration number: ",i_data_epochs) 
     # generate table with positions and results (wdl) in parallel to calculation
     os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
 
