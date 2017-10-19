@@ -34,8 +34,9 @@ y2[:,4] = (df2["wdl"]==2)*1
 m=load_model(r"data/model3KRPvKRP_r_temp9.h5")
 
 # change the learning rate
-sgd = SGD(lr=0.002, momentum=0.9)
-m.compile(loss='categorical_crossentropy', optimizer=sgd)
+adam=Adam()
+#sgd = SGD(lr=0.002, momentum=0.9)
+m.compile(loss='categorical_crossentropy', optimizer=adam)
 
 hist_loss=[]
 hist_val_loss=[]
