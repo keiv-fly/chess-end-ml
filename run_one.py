@@ -1,6 +1,8 @@
 # nohup /bin/bash run.sh > out.txt 2>&1 &
 # tail -f out.txt
 
+# nohup python run_one.py > out.txt 2>&1 &
+
 print("----------------------------")
 print("\nNew iteration\n")
 print("imports")
@@ -15,6 +17,8 @@ from keras.models import load_model
 import datetime
 import os
 from lib import features_from_table,generate_table
+import signal
+
 print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
 print("code start")
 
@@ -36,19 +40,35 @@ y2[:,4] = (df2["wdl"]==2)*1
 m=load_model(r"data/model3KRPvKRP_r_temp9.h5")
 
 # change the learning rate
-#adam=Adam()
-sgd = SGD(lr=0.1, momentum=0.9)
-m.compile(loss='categorical_crossentropy', optimizer= sgd) #adam)
+adam=Adam()
+#sgd = SGD(lr=0.02, momentum=0.9)
+m.compile(loss='categorical_crossentropy', optimizer=adam) #sgd) #adam)
 
-for i_data_epochs in range(21):
+acc_hist = []
+loss_hist = []
+val_loss_hist = []
+
+def exit_gracefully():
+    print("\nTerminated\nAll Python Iterations\nloss\nval_loss\nacc")
+    _ = [print(x) for x in loss_hist]
+    print()
+    _ = [print(x) for x in val_loss_hist]
+    print()
+    _ = [print(x) for x in acc_hist]
+    print()
+
+signal.signal(signal.SIGINT, exit_gracefully)
+signal.signal(signal.SIGTERM, exit_gracefully)
+
+for i_data_epochs in range(100):
     print("\nPython iteration number: ", i_data_epochs)
     # generate table with positions and results (wdl) in parallel to calculation
     os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
 
     #load table calculated in the previous iteration
     df = pd.read_hdf("data/KRPvKRP_table_10M_random_iter.h5")
-    if i_data_epochs == 0:
-        df = df[:500000]
+    #if i_data_epochs == 0:
+        #df = df[:500000]
     # generate feature boards from the table above
     start_time = datetime.datetime.now()
     X=features_from_table(df)
@@ -88,3 +108,14 @@ for i_data_epochs in range(21):
     _ = [print(x) for x in hist.history["loss"]]
     _ = [print(x) for x in hist.history["val_loss"]]
     print(acc)
+    acc_hist.append(acc)
+    loss_hist.append(hist.history["loss"][0])
+    val_loss_hist.append(hist.history["val_loss"][0])
+
+print("\n\nAll Python Iterations\nloss\nval_loss\nacc")
+_ = [print(x) for x in loss_hist]
+print()
+_ = [print(x) for x in val_loss_hist]
+print()
+_ = [print(x) for x in acc_hist]
+print()
