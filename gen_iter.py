@@ -4,7 +4,7 @@ import pandas
 import os
 
 start_time = datetime.datetime.now()
-df= generate_table()
+df= generate_table(1000000)
 end_time = datetime.datetime.now()
 print("Position generation time: ", end_time - start_time)
 
