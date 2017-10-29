@@ -17,7 +17,7 @@ from keras.models import load_model
 import datetime
 import os
 from lib import features_from_table,generate_table
-import signal
+import signal, sys
 
 print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
 print("code start")
@@ -48,7 +48,7 @@ acc_hist = []
 loss_hist = []
 val_loss_hist = []
 
-def exit_gracefully():
+def exit_gracefully(signum, frame):
     print("\nTerminated\nAll Python Iterations\nloss\nval_loss\nacc")
     _ = [print(x) for x in loss_hist]
     print()
@@ -56,6 +56,7 @@ def exit_gracefully():
     print()
     _ = [print(x) for x in acc_hist]
     print()
+    sys.exit()
 
 signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully)
