@@ -2,7 +2,7 @@ import keras
 import numpy as np
 import pandas as pd
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, Flatten
+from keras.layers import Input, Dense, Activation, Flatten, MaxPool2D, Dropout
 from keras.layers.merge import Add
 from keras.layers import Conv2D, Conv3D, GlobalMaxPool2D, MaxPooling3D, MaxPooling2D
 from keras.layers import SeparableConv2D
@@ -41,21 +41,21 @@ y2[:,4] = (df2["wdl"]==2)*1
 
 inputs = Input(shape=(8,8,16))
 x = inputs
-
-x = Conv2D(8, kernel_size = 3, padding="same")(x)
-x = BatchNormalization()(x)
-x = Activation("relu")(x)
-
-def rep_layer(x,channels):
-    x = Conv2D(channels, kernel_size = 3, padding="same")(x)
-    x = BatchNormalization()(x)
-    x = Activation("relu")(x)
-    #x = Add()([x1, x])
-    return x
-for i in range(5):
-    x = rep_layer(x,8)
+drp = 0.1
+base_channels=32
+x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
+x = MaxPool2D()(x)
+#x = Dropout(drp)(x)
+x = Conv2D(base_channels*2, kernel_size = 3, padding="same", activation='relu')(x)
+x = MaxPool2D()(x)
+#x = Dropout(drp)(x)
+x = Conv2D(base_channels*4, kernel_size = 3, padding="same", activation='relu')(x)
+x = MaxPool2D()(x)
+#x = Dropout(drp)(x)
 
 x = Flatten()(x)
+x = Dense(base_channels*8, activation='relu')(x)
+#x = Dropout(drp)(x)
 predictions = (Dense(5, activation='softmax'))(x)
 adam=Adam()
 
@@ -65,16 +65,15 @@ model.compile(loss='categorical_crossentropy', optimizer=adam, metrics = ['acc']
 hist = model.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2)) #1024*8
 model.save(r"data/model20KRPvKRP.h5")
 
-_ = [print(x[0], ", ",x[1]) for x in zip(hist.history["loss"],hist.history["val_loss"])]
 df_hist = pd.DataFrame(list(zip(hist.history["loss"],hist.history["val_loss"])))
 df_hist.columns = ["loss", "val_loss"]
 df_hist.to_csv("data/model20KRPvKRP_r_acc.csv", index=False)
 # model.summary()
 
-y_train = model.predict(X2, batch_size=1024*2, verbose=1)
-y_train_cat=np.argmax(y_train,1)-2
-acc = np.sum(y_train_cat==df2.wdl)/y_train_cat.shape[0]
-print("\nerror = ", 1-acc)
+#y_train = model.predict(X2, batch_size=1024*2, verbose=1)
+#y_train_cat=np.argmax(y_train,1)-2
+#acc = np.sum(y_train_cat==df2.wdl)/y_train_cat.shape[0]
+#print("\nerror = ", 1-acc)
 
 #model.save(r"data/model2KRPvKRP_temp1.h5")
 #model=load_model(r"data/model1KRPvKRP_temp1.h5")
