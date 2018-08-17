@@ -41,7 +41,7 @@ m=load_model(r"data/model3KRPvKRP_r_temp9.h5")
 
 # change the learning rate
 adam=Adam()
-#sgd = SGD(lr=0.02, momentum=0.9)
+sgd = SGD(lr=0.02, momentum=0.9)
 m.compile(loss='categorical_crossentropy', optimizer=adam) #sgd) #adam)
 
 acc_hist = []
@@ -58,8 +58,19 @@ def exit_gracefully(signum, frame):
     print()
     sys.exit()
 
+
+def print_current_results(signum, frame):
+    print("\nTemp result\nAll Python Iterations\nloss\nval_loss\nacc")
+    _ = [print(x) for x in loss_hist]
+    print()
+    _ = [print(x) for x in val_loss_hist]
+    print()
+    _ = [print(x) for x in acc_hist]
+    print()
+
 signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully)
+signal.signal(signal.SIGUSR1, print_current_results)
 
 for i_data_epochs in range(100):
     print("\nPython iteration number: ", i_data_epochs)
