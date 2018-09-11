@@ -41,56 +41,53 @@ y2[:,4] = (df2["wdl"]==2)*1
 
 inputs = Input(shape=(8,8,16))
 x = inputs
-#drp = 0.1
 base_channels=32
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x = MaxPool2D()(x)
-# x = Conv2D(base_channels*2, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x1 = x
-# x = Conv2D(base_channels*2, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x =Add()([x,x1])
-x = MaxPool2D()(x)
-# x = Conv2D(base_channels*4, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x1 = x
-# x = Conv2D(base_channels*4, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x =Add()([x,x1])
-x = MaxPool2D()(x)
 
-#x = Dropout(drp)(x)
+x = Conv2D(base_channels, kernel_size = 3, padding="same")(x)
+x = BatchNormalization()(x)
+x = Activation(activation='relu')(x)
+
+# x1 = x
+# #x = BatchNormalization()(x)
+# #x = Activation(activation='relu')(x)
+# x = Conv2D(base_channels, kernel_size = 3, padding="same")(x)
+# x = Add()([x,x1])
+
+x1 = x
+#x = BatchNormalization()(x)
+#x = Activation(activation='relu')(x)
+x = Conv2D(base_channels*2, kernel_size = 3, padding="same", strides=2)(x)
+x1 = Conv2D(base_channels*2, kernel_size = 1, padding="same", strides=2)(x1)
+x = Add()([x,x1])
+
+x1 = x
+x = BatchNormalization()(x)
+x = Activation(activation='relu')(x)
+x = Conv2D(base_channels*2, kernel_size = 3, padding="same")(x)
+x = Add()([x,x1])
+
+x1 = x
+x = BatchNormalization()(x)
+x = Activation(activation='relu')(x)
+x = Conv2D(base_channels*4, kernel_size = 3, padding="same", strides=2)(x)
+x1 = Conv2D(base_channels*4, kernel_size = 1, padding="same", strides=2)(x1)
+x = Add()([x,x1])
+
+# x1 = x
+# x = BatchNormalization()(x)
+# x = Activation(activation='relu')(x)
+# x = Conv2D(base_channels*4, kernel_size = 3, padding="same")(x)
+# x = Add()([x,x1])
+
+x1 = x
+x = BatchNormalization()(x)
+x = Activation(activation='relu')(x)
+x = Conv2D(base_channels*8, kernel_size = 3, padding="same", strides=2)(x)
+x1 = Conv2D(base_channels*8, kernel_size = 1, padding="same", strides=2)(x1)
+x = Add()([x,x1])
 
 x = Flatten()(x)
 x = Dense(base_channels*8, activation='relu')(x)
-#x = Dropout(drp)(x)
 predictions = (Dense(5, activation='softmax'))(x)
 adam=Adam()
 

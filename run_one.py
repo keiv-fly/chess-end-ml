@@ -2,6 +2,7 @@
 # tail -f out.txt
 
 # nohup python run_one.py > out.txt 2>&1 &
+# python -u run_one.py
 
 print("----------------------------")
 print("\nNew iteration\n")
@@ -37,45 +38,51 @@ y2[:,3] = (df2["wdl"]==1)*1
 y2[:,4] = (df2["wdl"]==2)*1
 
 # load the previous model
-m=load_model(r"data/model3KRPvKRP_r_temp9.h5")
+m=load_model(r"data/model20KRPvKRP.h5")
 
 # change the learning rate
-adam=Adam()
-sgd = SGD(lr=0.02, momentum=0.9)
-m.compile(loss='categorical_crossentropy', optimizer=adam) #sgd) #adam)
+#adam=Adam()
+sgd = SGD(lr=0.0001, momentum=0.9)
+#m.compile(loss='categorical_crossentropy', optimizer=adam) #sgd) #adam)
 
 acc_hist = []
+val_acc_hist = []
 loss_hist = []
 val_loss_hist = []
 
 def exit_gracefully(signum, frame):
-    print("\nTerminated\nAll Python Iterations\nloss\nval_loss\nacc")
+    print("\n\nAll Python Iterations\nloss\nval_loss\nacc\nval_acc")
     _ = [print(x) for x in loss_hist]
     print()
     _ = [print(x) for x in val_loss_hist]
     print()
     _ = [print(x) for x in acc_hist]
+    print()
+    _ = [print(x) for x in val_acc_hist]
     print()
     sys.exit()
 
 
 def print_current_results(signum, frame):
-    print("\nTemp result\nAll Python Iterations\nloss\nval_loss\nacc")
+    print("\n\nAll Python Iterations\nloss\nval_loss\nacc\nval_acc")
     _ = [print(x) for x in loss_hist]
     print()
     _ = [print(x) for x in val_loss_hist]
     print()
     _ = [print(x) for x in acc_hist]
     print()
+    _ = [print(x) for x in val_acc_hist]
+    print()
 
 signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully)
-signal.signal(signal.SIGUSR1, print_current_results)
+#signal.signal(signal.SIGUSR1, print_current_results)
 
-for i_data_epochs in range(100):
+for i_data_epochs in range(1000):
     print("\nPython iteration number: ", i_data_epochs)
     # generate table with positions and results (wdl) in parallel to calculation
-    os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
+    #os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
+    os.system("START python -u gen_iter.py > gen_out.txt")
 
     #load table calculated in the previous iteration
     df = pd.read_hdf("data/KRPvKRP_table_10M_random_iter.h5")
@@ -85,7 +92,7 @@ for i_data_epochs in range(100):
     start_time = datetime.datetime.now()
     X=features_from_table(df)
     end_time = datetime.datetime.now()
-    print("Feature boards generation time: ",end_time - start_time)
+    #print("Feature boards generation time: ",end_time - start_time)
 
     # swap axis for Keras
     X = np.swapaxes(X,1,2)
@@ -103,31 +110,34 @@ for i_data_epochs in range(100):
 
     # calculate epochs and calculate execution time
     start_time = datetime.datetime.now()
-    print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
+    #print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
     hist = m.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2))
     end_time = datetime.datetime.now()
-    os.remove(r"data/model3KRPvKRP_r_temp9.h5")
-    m.save(r"data/model3KRPvKRP_r_temp9.h5")
-    print(end_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
-    print("Training time: ",end_time - start_time)
+    os.remove(r"data/model20KRPvKRP.h5")
+    m.save(r"data/model20KRPvKRP.h5")
+    #print(end_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
+    #print("Training time: ",end_time - start_time)
 
     # calculate and print training, test loss, accuracy
-    y_train = m.predict(X2, batch_size=1024*2, verbose=1)
-    y_train_cat=np.argmax(y_train,1)-2
-    acc = np.sum(y_train_cat==df2.wdl)/y_train_cat.shape[0]
-    n_errors = y_train_cat.shape[0] - np.sum(y_train_cat==df2.wdl)
-    print("\n\nloss\nval_loss\nacc")
-    _ = [print(x) for x in hist.history["loss"]]
-    _ = [print(x) for x in hist.history["val_loss"]]
-    print(acc)
-    acc_hist.append(acc)
+    #y_train = m.predict(X2, batch_size=1024*2, verbose=1)
+    #y_train_cat=np.argmax(y_train,1)-2
+    #acc = np.sum(y_train_cat==df2.wdl)/y_train_cat.shape[0]
+    #n_errors = y_train_cat.shape[0] - np.sum(y_train_cat==df2.wdl)
+    #print("\n\nloss\nval_loss\nacc")
+    #_ = [print(x) for x in hist.history["loss"]]
+    #_ = [print(x) for x in hist.history["val_loss"]]
+    #print(acc)
+    acc_hist.append(hist.history["acc"][0])
+    val_acc_hist.append(hist.history["val_acc"][0])
     loss_hist.append(hist.history["loss"][0])
     val_loss_hist.append(hist.history["val_loss"][0])
 
-print("\n\nAll Python Iterations\nloss\nval_loss\nacc")
+print("\n\nAll Python Iterations\nloss\nval_loss\nacc\nval_acc")
 _ = [print(x) for x in loss_hist]
 print()
 _ = [print(x) for x in val_loss_hist]
 print()
 _ = [print(x) for x in acc_hist]
+print()
+_ = [print(x) for x in val_acc_hist]
 print()

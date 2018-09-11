@@ -44,46 +44,41 @@ x = inputs
 #drp = 0.1
 base_channels=32
 #x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
+x = Conv2D(base_channels*4, kernel_size = 3, padding="same")(x)
 x = BatchNormalization()(x)
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-#x =Add()([x,x1])
-#x1 = x
-x = Conv2D(base_channels, kernel_size = 3, padding="same", activation='relu')(x)
-x = BatchNormalization()(x)
-x =Add()([x,x1])
-x = MaxPool2D()(x)
-# x = Conv2D(base_channels*2, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
+x = Activation(activation='relu')(x)
 # x1 = x
-# x = Conv2D(base_channels*2, kernel_size = 3, padding="same", activation='relu')(x)
+# #x = BatchNormalization()(x)
+# #x = Activation(activation='relu')(x)
+# x = Conv2D(base_channels, kernel_size = 1, padding="same")(x)
 # x = BatchNormalization()(x)
+# x = Activation(activation='relu')(x)
+# x = Conv2D(base_channels, kernel_size = 3, padding="same")(x)
+# x = BatchNormalization()(x)
+# x = Activation(activation='relu')(x)
+# x = Conv2D(base_channels*4, kernel_size = 1, padding="same")(x)
+# #x1 = Conv2D(base_channels*4, kernel_size = 1, padding="same")(x1)
 # x =Add()([x,x1])
+
+
+for i in range(5):
+    x1 = x
+    if i>0:
+        x = BatchNormalization()(x)
+        x = Activation(activation='relu')(x)
+    x = Conv2D(base_channels, kernel_size=1, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation(activation='relu')(x)
+    x = Conv2D(base_channels, kernel_size=3, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation(activation='relu')(x)
+    x = Conv2D(base_channels * 4, kernel_size=1, padding="same")(x)
+    x =Add()([x,x1])
+
 x = MaxPool2D()(x)
-# x = Conv2D(base_channels*4, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x1 = x
-# x = Conv2D(base_channels*4, kernel_size = 3, padding="same", activation='relu')(x)
-# x = BatchNormalization()(x)
-# x =Add()([x,x1])
+
+x = MaxPool2D()(x)
+
 x = MaxPool2D()(x)
 
 #x = Dropout(drp)(x)

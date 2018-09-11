@@ -9,7 +9,7 @@ def features_from_table(df):
 
     data = np.zeros((n_rows, 16, 8, 8), dtype=np.float16)
     ii = 0
-    print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
+    #print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
     #print(ii)
     ii = ii + 1
     for i in range(int(np.ceil(n_rows / 1000))):
@@ -82,7 +82,7 @@ def features_from_table(df):
                         np.newaxis]
     #print(ii)
     ii = ii + 1
-    print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
+    #print(datetime.datetime.now().strftime("%H:%M:%S.%f"))
     return data
 
 def generate_table(n_iter = 25000000):
