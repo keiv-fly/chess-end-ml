@@ -15,6 +15,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam, SGD
 from keras.utils import to_categorical
 from keras.models import load_model
+from keras.callbacks import CSVLogger
 import datetime
 import os
 from lib import features_from_table,generate_table
@@ -106,12 +107,12 @@ for i_data_epochs in range(1000):
     y[:,3] = (df["wdl"]==1)*1
     y[:,4] = (df["wdl"]==2)*1
 
-
+    csv_logger = CSVLogger('training.log', append=True)
 
     # calculate epochs and calculate execution time
     start_time = datetime.datetime.now()
     #print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
-    hist = m.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2))
+    hist = m.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2), callbacks=[csv_logger])
     end_time = datetime.datetime.now()
     os.remove(r"data/model20KRPvKRP.h5")
     m.save(r"data/model20KRPvKRP.h5")
