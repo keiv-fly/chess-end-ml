@@ -79,7 +79,7 @@ signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully)
 #signal.signal(signal.SIGUSR1, print_current_results)
 
-for i_data_epochs in range(1000):
+for i_data_epochs in range(10000):
     print("\nPython iteration number: ", i_data_epochs)
     # generate table with positions and results (wdl) in parallel to calculation
     #os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
