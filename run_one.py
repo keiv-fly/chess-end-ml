@@ -83,8 +83,8 @@ signal.signal(signal.SIGTERM, exit_gracefully)
 for i_data_epochs in range(10000):
     print("\nPython iteration number: ", i_data_epochs)
     # generate table with positions and results (wdl) in parallel to calculation
-    #os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
-    os.system("START python -u gen_iter.py > gen_out.txt")
+    os.system("nohup python -u gen_iter.py > gen_out.txt 2>&1 &")
+    #os.system("START python -u gen_iter.py > gen_out.txt")
 
     #load table calculated in the previous iteration
     df = pd.read_hdf("data/KRPvKRP_table_10M_random_iter.h5")
@@ -113,7 +113,7 @@ for i_data_epochs in range(10000):
     # calculate epochs and calculate execution time
     start_time = datetime.datetime.now()
     #print(start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
-    hist = m.fit(X, y, batch_size=256, epochs=1, validation_data=(X2,y2), callbacks=[csv_logger])
+    hist = m.fit(X, y, batch_size=256, epochs=7, validation_data=(X2,y2), callbacks=[csv_logger])
     end_time = datetime.datetime.now()
     os.remove(r"data/model20KRPvKRP.h5")
     m.save(r"data/model20KRPvKRP.h5")

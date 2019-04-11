@@ -106,7 +106,7 @@ def generate_table(n_iter = 25000000):
     board = board_start0.copy()
     i_counter = 0
 
-    with chess.syzygy.open_tablebases(r"syzygy") as tablebases:
+    with chess.syzygy.open_tablebase(r"syzygy") as tablebases:
         for ii in range(n_iter):
             if i_counter % 100000 == 0:
                 print(i_counter, " of ", n_iter, ", time: ", datetime.datetime.now().strftime("%H:%M:%S.%f"))
